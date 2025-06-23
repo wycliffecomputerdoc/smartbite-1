@@ -13,19 +13,19 @@ export function HeroSection() {
       title: "Welcome to SmartBite",
       subtitle: "AI-Powered Dining Experience",
       description: "Discover exceptional cuisine with intelligent recommendations tailored just for you.",
-      image: "/placeholder.svg?height=600&width=800",
+      image: "/images/hero-bg-1.jpg",
     },
     {
       title: "Smart Ordering",
       subtitle: "Voice & Chat Enabled",
       description: "Order with ease using our AI assistant or voice commands for a seamless experience.",
-      image: "/placeholder.svg?height=600&width=800",
+      image: "/images/hero-bg-2.jpg",
     },
     {
       title: "Fresh & Local",
       subtitle: "Farm to Table Excellence",
       description: "Sustainably sourced ingredients prepared by our award-winning chefs.",
-      image: "/placeholder.svg?height=600&width=800",
+      image: "/images/hero-bg-3.jpg",
     },
   ]
 

@@ -9,14 +9,14 @@ export function TestimonialsSection() {
       content:
         "The AI recommendations are spot on! I discovered my new favorite dish thanks to SmartBite's intelligent suggestions.",
       rating: 5,
-      avatar: "/placeholder.svg?height=60&width=60",
+      avatar: "/images/customer-1.jpg",
     },
     {
       name: "Mike Chen",
       role: "Busy Professional",
       content: "Voice ordering is a game-changer. I can place my order while driving home from work. So convenient!",
       rating: 5,
-      avatar: "/placeholder.svg?height=60&width=60",
+      avatar: "/images/customer-2.jpg",
     },
     {
       name: "Emily Rodriguez",
@@ -24,7 +24,7 @@ export function TestimonialsSection() {
       content:
         "The chatbot helped me find kid-friendly options and made reservations so easy. My family loves coming here!",
       rating: 5,
-      avatar: "/placeholder.svg?height=60&width=60",
+      avatar: "/images/customer-3.jpg",
     },
   ]
 
