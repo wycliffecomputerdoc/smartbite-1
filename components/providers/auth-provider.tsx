@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { createContext, useEffect, useState } from "react"
 
 interface User {
