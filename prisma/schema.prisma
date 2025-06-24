@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("NEON_DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  phone     String?
+  role      UserRole @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  reservations Reservation[]
+  orders       Order[]
+
+  @@map("users")
+}
+
+model Reservation {
+  id                 String            @id @default(cuid())
+  confirmationNumber String            @unique
+  date               DateTime
+  time               String
+  partySize          Int
+  status             ReservationStatus @default(PENDING)
+  specialRequests    String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  // Customer information
+  customerName  String
+  customerEmail String
+  customerPhone String
+
+  // Relations
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("reservations")
+}
+
+model MenuItem {
+  id          String         @id @default(cuid())
+  name        String
+  description String
+  price       Decimal        @db.Decimal(10, 2)
+  category    MenuCategory
+  image       String?
+  available   Boolean        @default(true)
+  featured    Boolean        @default(false)
+  allergens   String[]       @default([])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Relations
+  orderItems OrderItem[]
+
+  @@map("menu_items")
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  orderNumber String     @unique
+  status     OrderStatus @default(PENDING)
+  total      Decimal     @db.Decimal(10, 2)
+  notes      String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  // Customer information
+  customerName  String
+  customerEmail String
+  customerPhone String
+
+  // Relations
+  userId     String?
+  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  orderItems OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id       String  @id @default(cuid())
+  quantity Int
+  price    Decimal @db.Decimal(10, 2)
+  notes    String?
+
+  // Relations
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@map("order_items")
+}
+
+enum UserRole {
+  CUSTOMER
+  STAFF
+  MANAGER
+  ADMIN
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum MenuCategory {
+  APPETIZERS
+  SALADS
+  MAINS
+  DESSERTS
+  BEVERAGES
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  DELIVERED
+  CANCELLED
+}

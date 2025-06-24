@@ -1,8 +1,9 @@
 "use client"
 
+import { useUser } from "@clerk/nextjs"
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,9 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar"
 import { Badge } from "@/components/ui/badge"
 import { CalendarIcon, Clock, Users, MapPin, Phone, Mail, CheckCircle } from "lucide-react"
-import { format, addDays, isBefore, isToday, isTomorrow } from "date-fns"
-import { cn } from "@/lib/utils"
-import { useToast } from "@/hooks/use-toast"
+import { format, addDays, isBefore, startOfDay, isToday, isTomorrow } from "date-fns"
 
 interface ReservationData {
   date: Date | undefined
@@ -25,94 +24,47 @@ interface ReservationData {
   specialRequests: string
 }
 
-interface TimeSlot {
-  time: string
-  available: boolean
-  popular?: boolean
-}
+const timeSlots = [
+  { time: "5:00 PM", available: true, popular: false },
+  { time: "5:30 PM", available: true, popular: false },
+  { time: "6:00 PM", available: true, popular: true },
+  { time: "6:30 PM", available: false, popular: true },
+  { time: "7:00 PM", available: true, popular: true },
+  { time: "7:30 PM", available: true, popular: true },
+  { time: "8:00 PM", available: true, popular: false },
+  { time: "8:30 PM", available: true, popular: false },
+  { time: "9:00 PM", available: true, popular: false },
+  { time: "9:30 PM", available: true, popular: false },
+]
 
-export function ReservationBooking() {
+export default function ReservationBooking() {
+  const { user, isSignedIn } = useUser()
   const [step, setStep] = useState(1)
-  const [reservation, setReservation] = useState<ReservationData>({
+  const [reservationData, setReservationData] = useState<ReservationData>({
     date: undefined,
     time: "",
     partySize: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.emailAddresses[0]?.emailAddress || "",
+    phone: user?.phoneNumbers[0]?.phoneNumber || "",
     specialRequests: "",
   })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const { toast } = useToast()
+  const [confirmationNumber, setConfirmationNumber] = useState("")
 
-  // Generate available time slots based on selected date
-  const getAvailableTimeSlots = (selectedDate: Date | undefined): TimeSlot[] => {
-    if (!selectedDate) return []
-
-    const baseSlots = [
-      { time: "11:00 AM", available: true },
-      { time: "11:30 AM", available: true },
-      { time: "12:00 PM", available: true, popular: true },
-      { time: "12:30 PM", available: true, popular: true },
-      { time: "1:00 PM", available: true, popular: true },
-      { time: "1:30 PM", available: true },
-      { time: "2:00 PM", available: true },
-      { time: "2:30 PM", available: false }, // Example unavailable slot
-      { time: "3:00 PM", available: true },
-      { time: "5:00 PM", available: true },
-      { time: "5:30 PM", available: true },
-      { time: "6:00 PM", available: true, popular: true },
-      { time: "6:30 PM", available: true, popular: true },
-      { time: "7:00 PM", available: true, popular: true },
-      { time: "7:30 PM", available: true, popular: true },
-      { time: "8:00 PM", available: true, popular: true },
-      { time: "8:30 PM", available: true },
-      { time: "9:00 PM", available: true },
-      { time: "9:30 PM", available: true },
-    ]
-
-    // Simulate different availability for different dates
-    if (isToday(selectedDate)) {
-      // For today, make morning slots unavailable
-      return baseSlots.map((slot) => ({
-        ...slot,
-        available: slot.time.includes("AM") ? false : slot.available,
-      }))
-    }
-
-    return baseSlots
+  const updateReservationData = (field: keyof ReservationData, value: any) => {
+    setReservationData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleDateSelect = (date: Date | undefined) => {
-    setReservation({ ...reservation, date, time: "" })
-  }
+  const canProceedToStep2 = reservationData.date && reservationData.time && reservationData.partySize
+  const canProceedToStep3 =
+    reservationData.firstName && reservationData.lastName && reservationData.email && reservationData.phone
 
-  const handleTimeSelect = (time: string) => {
-    setReservation({ ...reservation, time })
-  }
-
-  const handleInputChange = (field: keyof ReservationData, value: string) => {
-    setReservation({ ...reservation, [field]: value })
-  }
-
-  const canProceedToStep2 = reservation.date && reservation.time && reservation.partySize
-
-  const canProceedToStep3 = reservation.firstName && reservation.lastName && reservation.email && reservation.phone
-
-  const handleSubmitReservation = async () => {
-    setIsSubmitting(true)
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    toast({
-      title: "Reservation Confirmed!",
-      description: "We've sent a confirmation email to your address.",
-    })
-
+  const handleSubmitReservation = () => {
+    // Generate confirmation number
+    const confirmation = "SB" + Math.random().toString(36).substr(2, 8).toUpperCase()
+    setConfirmationNumber(confirmation)
     setStep(4)
-    setIsSubmitting(false)
   }
 
   const formatDateDisplay = (date: Date) => {
@@ -121,379 +73,451 @@ export function ReservationBooking() {
     return format(date, "EEEE, MMMM d")
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Make a Reservation</h1>
-          <p className="text-xl text-gray-600">Book your table at SmartBite for an unforgettable dining experience</p>
-        </div>
+  // Pre-fill user data when signed in
+  useState(() => {
+    if (isSignedIn && user) {
+      setReservationData((prev) => ({
+        ...prev,
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.emailAddresses[0]?.emailAddress || "",
+        phone: user.phoneNumbers[0]?.phoneNumber || "",
+      }))
+    }
+  })
 
-        {/* Progress Steps */}
-        <div className="flex justify-center mb-8">
-          <div className="flex items-center space-x-4">
-            {[1, 2, 3].map((stepNumber) => (
-              <div key={stepNumber} className="flex items-center">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    step >= stepNumber ? "bg-orange-600 text-white" : "bg-gray-200 text-gray-500"
-                  }`}
-                >
-                  {step > stepNumber ? <CheckCircle className="h-4 w-4" /> : stepNumber}
+  if (step === 1) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold">Make a Reservation</h1>
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                  1
                 </div>
-                {stepNumber < 3 && (
-                  <div className={`w-12 h-0.5 mx-2 ${step > stepNumber ? "bg-orange-600" : "bg-gray-200"}`} />
-                )}
+                <span className="ml-2 text-sm font-medium">Date & Time</span>
               </div>
-            ))}
+              <div className="w-8 h-px bg-gray-300"></div>
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-medium">
+                  2
+                </div>
+                <span className="ml-2 text-sm text-gray-600">Details</span>
+              </div>
+              <div className="w-8 h-px bg-gray-300"></div>
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-medium">
+                  3
+                </div>
+                <span className="ml-2 text-sm text-gray-600">Confirm</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {step === 1 && (
+        <div className="grid md:grid-cols-2 gap-8">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <CalendarIcon className="h-5 w-5 mr-2 text-orange-600" />
-                Select Date, Time & Party Size
+                <CalendarIcon className="w-5 h-5 mr-2" />
+                Select Date
               </CardTitle>
+              <CardDescription>Choose your preferred dining date</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Date Selection */}
-                <div>
-                  <Label className="text-base font-medium mb-4 block">Select Date</Label>
-                  <Calendar
-                    mode="single"
-                    selected={reservation.date}
-                    onSelect={handleDateSelect}
-                    disabled={(date) => isBefore(date, new Date()) || date > addDays(new Date(), 60)}
-                    className="rounded-md border"
-                  />
-                </div>
-
-                {/* Time & Party Size */}
-                <div className="space-y-6">
-                  {/* Party Size */}
-                  <div>
-                    <Label className="text-base font-medium mb-3 block">Party Size</Label>
-                    <Select
-                      value={reservation.partySize}
-                      onValueChange={(value) => handleInputChange("partySize", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select number of guests" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map((size) => (
-                          <SelectItem key={size} value={size.toString()}>
-                            {size} {size === 1 ? "Guest" : "Guests"}
-                          </SelectItem>
-                        ))}
-                        <SelectItem value="9+">9+ Guests (Call for availability)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Time Selection */}
-                  {reservation.date && (
-                    <div>
-                      <Label className="text-base font-medium mb-3 block">
-                        Available Times for {formatDateDisplay(reservation.date)}
-                      </Label>
-                      <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
-                        {getAvailableTimeSlots(reservation.date).map((slot) => (
-                          <Button
-                            key={slot.time}
-                            variant={reservation.time === slot.time ? "default" : "outline"}
-                            disabled={!slot.available}
-                            onClick={() => handleTimeSelect(slot.time)}
-                            className={cn(
-                              "relative",
-                              reservation.time === slot.time && "bg-orange-600 hover:bg-orange-700",
-                              !slot.available && "opacity-50 cursor-not-allowed",
-                            )}
-                          >
-                            {slot.time}
-                            {slot.popular && slot.available && (
-                              <Badge className="absolute -top-1 -right-1 text-xs bg-green-500">Popular</Badge>
-                            )}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex justify-end">
-                <Button
-                  onClick={() => setStep(2)}
-                  disabled={!canProceedToStep2}
-                  className="bg-orange-600 hover:bg-orange-700"
-                >
-                  Continue to Contact Details
-                </Button>
-              </div>
+            <CardContent>
+              <Calendar
+                mode="single"
+                selected={reservationData.date}
+                onSelect={(date) => updateReservationData("date", date)}
+                disabled={(date) => isBefore(date, startOfDay(new Date())) || date > addDays(new Date(), 60)}
+                className="rounded-md border"
+              />
             </CardContent>
           </Card>
-        )}
 
-        {step === 2 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Users className="h-5 w-5 mr-2 text-orange-600" />
-                Contact Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Reservation Summary */}
-              <div className="bg-orange-50 p-4 rounded-lg">
-                <h3 className="font-medium text-gray-900 mb-2">Reservation Summary</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div className="flex items-center">
-                    <CalendarIcon className="h-4 w-4 mr-2 text-orange-600" />
-                    {reservation.date && formatDateDisplay(reservation.date)}
-                  </div>
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-2 text-orange-600" />
-                    {reservation.time}
-                  </div>
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 mr-2 text-orange-600" />
-                    {reservation.partySize} {reservation.partySize === "1" ? "Guest" : "Guests"}
-                  </div>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Clock className="w-5 h-5 mr-2" />
+                  Select Time
+                </CardTitle>
+                <CardDescription>
+                  {reservationData.date
+                    ? `Available times for ${formatDateDisplay(reservationData.date)}`
+                    : "Please select a date first"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-2">
+                  {timeSlots.map((slot) => (
+                    <Button
+                      key={slot.time}
+                      variant={reservationData.time === slot.time ? "default" : "outline"}
+                      disabled={!slot.available || !reservationData.date}
+                      onClick={() => updateReservationData("time", slot.time)}
+                      className="relative"
+                    >
+                      {slot.time}
+                      {slot.popular && (
+                        <Badge variant="secondary" className="absolute -top-1 -right-1 text-xs px-1">
+                          Popular
+                        </Badge>
+                      )}
+                    </Button>
+                  ))}
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Users className="w-5 h-5 mr-2" />
+                  Party Size
+                </CardTitle>
+                <CardDescription>How many guests will be dining?</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Select
+                  value={reservationData.partySize}
+                  onValueChange={(value) => updateReservationData("partySize", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select party size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((size) => (
+                      <SelectItem key={size} value={size.toString()}>
+                        {size} {size === 1 ? "Guest" : "Guests"}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="9+">9+ Guests (Please call)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <div className="mt-8 flex justify-end">
+          <Button onClick={() => setStep(2)} disabled={!canProceedToStep2} size="lg">
+            Continue to Details
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  if (step === 2) {
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold">Contact Information</h1>
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm">
+                  <CheckCircle className="w-4 h-4" />
+                </div>
+                <span className="ml-2 text-sm text-green-600">Date & Time</span>
               </div>
-
-              {/* Contact Form */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="firstName">First Name *</Label>
-                  <Input
-                    id="firstName"
-                    value={reservation.firstName}
-                    onChange={(e) => handleInputChange("firstName", e.target.value)}
-                    placeholder="John"
-                  />
+              <div className="w-8 h-px bg-gray-300"></div>
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                  2
                 </div>
-                <div>
-                  <Label htmlFor="lastName">Last Name *</Label>
-                  <Input
-                    id="lastName"
-                    value={reservation.lastName}
-                    onChange={(e) => handleInputChange("lastName", e.target.value)}
-                    placeholder="Doe"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email Address *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={reservation.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    placeholder="john@example.com"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone">Phone Number *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={reservation.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    placeholder="(555) 123-4567"
-                  />
-                </div>
+                <span className="ml-2 text-sm font-medium">Details</span>
               </div>
+              <div className="w-8 h-px bg-gray-300"></div>
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-medium">
+                  3
+                </div>
+                <span className="ml-2 text-sm text-gray-600">Confirm</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Information</CardTitle>
+            <CardDescription>
+              {isSignedIn
+                ? "We've pre-filled your information. Please review and update if needed."
+                : "Please provide your contact information for the reservation."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="specialRequests">Special Requests (Optional)</Label>
-                <Textarea
-                  id="specialRequests"
-                  value={reservation.specialRequests}
-                  onChange={(e) => handleInputChange("specialRequests", e.target.value)}
-                  placeholder="Dietary restrictions, special occasions, seating preferences..."
-                  rows={3}
+                <Label htmlFor="firstName">First Name *</Label>
+                <Input
+                  id="firstName"
+                  value={reservationData.firstName}
+                  onChange={(e) => updateReservationData("firstName", e.target.value)}
+                  required
                 />
               </div>
+              <div>
+                <Label htmlFor="lastName">Last Name *</Label>
+                <Input
+                  id="lastName"
+                  value={reservationData.lastName}
+                  onChange={(e) => updateReservationData("lastName", e.target.value)}
+                  required
+                />
+              </div>
+            </div>
 
-              <div className="flex justify-between">
-                <Button variant="outline" onClick={() => setStep(1)}>
-                  Back
-                </Button>
-                <Button
-                  onClick={() => setStep(3)}
-                  disabled={!canProceedToStep3}
-                  className="bg-orange-600 hover:bg-orange-700"
-                >
-                  Review Reservation
-                </Button>
+            <div>
+              <Label htmlFor="email">Email Address *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={reservationData.email}
+                onChange={(e) => updateReservationData("email", e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="phone">Phone Number *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={reservationData.phone}
+                onChange={(e) => updateReservationData("phone", e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="specialRequests">Special Requests (Optional)</Label>
+              <Textarea
+                id="specialRequests"
+                value={reservationData.specialRequests}
+                onChange={(e) => updateReservationData("specialRequests", e.target.value)}
+                placeholder="Dietary restrictions, special occasions, seating preferences..."
+                rows={3}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="mt-8 flex justify-between">
+          <Button variant="outline" onClick={() => setStep(1)}>
+            Back to Date & Time
+          </Button>
+          <Button onClick={() => setStep(3)} disabled={!canProceedToStep3} size="lg">
+            Review Reservation
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  if (step === 3) {
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold">Review Your Reservation</h1>
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm">
+                  <CheckCircle className="w-4 h-4" />
+                </div>
+                <span className="ml-2 text-sm text-green-600">Date & Time</span>
+              </div>
+              <div className="w-8 h-px bg-gray-300"></div>
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm">
+                  <CheckCircle className="w-4 h-4" />
+                </div>
+                <span className="ml-2 text-sm text-green-600">Details</span>
+              </div>
+              <div className="w-8 h-px bg-gray-300"></div>
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                  3
+                </div>
+                <span className="ml-2 text-sm font-medium">Confirm</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Reservation Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between py-2 border-b">
+                <span className="font-medium">Date</span>
+                <span>{reservationData.date ? format(reservationData.date, "EEEE, MMMM d, yyyy") : ""}</span>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b">
+                <span className="font-medium">Time</span>
+                <span>{reservationData.time}</span>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b">
+                <span className="font-medium">Party Size</span>
+                <span>
+                  {reservationData.partySize} {reservationData.partySize === "1" ? "Guest" : "Guests"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <span className="font-medium">Name</span>
+                <span>
+                  {reservationData.firstName} {reservationData.lastName}
+                </span>
               </div>
             </CardContent>
           </Card>
-        )}
 
-        {step === 3 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between py-2 border-b">
+                <span className="font-medium">Email</span>
+                <span>{reservationData.email}</span>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b">
+                <span className="font-medium">Phone</span>
+                <span>{reservationData.phone}</span>
+              </div>
+              {reservationData.specialRequests && (
+                <div className="py-2">
+                  <span className="font-medium">Special Requests</span>
+                  <p className="mt-1 text-gray-600">{reservationData.specialRequests}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <CheckCircle className="h-5 w-5 mr-2 text-orange-600" />
-                Review & Confirm
+                <MapPin className="w-5 h-5 mr-2" />
+                Restaurant Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Complete Reservation Details */}
-              <div className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Reservation Details</h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <div className="flex items-center">
-                      <CalendarIcon className="h-5 w-5 mr-3 text-orange-600" />
-                      <div>
-                        <p className="font-medium">Date</p>
-                        <p className="text-gray-600">
-                          {reservation.date && format(reservation.date, "EEEE, MMMM d, yyyy")}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center">
-                      <Clock className="h-5 w-5 mr-3 text-orange-600" />
-                      <div>
-                        <p className="font-medium">Time</p>
-                        <p className="text-gray-600">{reservation.time}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center">
-                      <Users className="h-5 w-5 mr-3 text-orange-600" />
-                      <div>
-                        <p className="font-medium">Party Size</p>
-                        <p className="text-gray-600">
-                          {reservation.partySize} {reservation.partySize === "1" ? "Guest" : "Guests"}
-                        </p>
-                      </div>
-                    </div>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="font-medium">SmartBite Restaurant</p>
+                <p className="text-gray-600">123 Culinary Street, Food District</p>
+                <p className="text-gray-600">New York, NY 10001</p>
+                <div className="flex items-center space-x-4 mt-4">
+                  <div className="flex items-center">
+                    <Phone className="w-4 h-4 mr-1" />
+                    <span className="text-sm">(555) 123-4567</span>
                   </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center">
-                      <Users className="h-5 w-5 mr-3 text-orange-600" />
-                      <div>
-                        <p className="font-medium">Name</p>
-                        <p className="text-gray-600">
-                          {reservation.firstName} {reservation.lastName}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center">
-                      <Mail className="h-5 w-5 mr-3 text-orange-600" />
-                      <div>
-                        <p className="font-medium">Email</p>
-                        <p className="text-gray-600">{reservation.email}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center">
-                      <Phone className="h-5 w-5 mr-3 text-orange-600" />
-                      <div>
-                        <p className="font-medium">Phone</p>
-                        <p className="text-gray-600">{reservation.phone}</p>
-                      </div>
-                    </div>
+                  <div className="flex items-center">
+                    <Mail className="w-4 h-4 mr-1" />
+                    <span className="text-sm">info@smartbite.com</span>
                   </div>
                 </div>
-
-                {reservation.specialRequests && (
-                  <div className="mt-4 pt-4 border-t">
-                    <p className="font-medium mb-2">Special Requests</p>
-                    <p className="text-gray-600">{reservation.specialRequests}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Restaurant Info */}
-              <div className="bg-orange-50 p-4 rounded-lg">
-                <div className="flex items-start">
-                  <MapPin className="h-5 w-5 mr-3 text-orange-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium">SmartBite Restaurant</p>
-                    <p className="text-gray-600">123 Gourmet Street, Food City, FC 12345</p>
-                    <p className="text-gray-600">(555) 123-BITE</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Terms */}
-              <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg">
-                <p className="font-medium mb-2">Reservation Policy:</p>
-                <ul className="space-y-1">
-                  <li>• Please arrive within 15 minutes of your reservation time</li>
-                  <li>• Cancellations must be made at least 2 hours in advance</li>
-                  <li>• Large parties (8+) may require a deposit</li>
-                  <li>• We'll hold your table for 15 minutes past reservation time</li>
-                </ul>
-              </div>
-
-              <div className="flex justify-between">
-                <Button variant="outline" onClick={() => setStep(2)}>
-                  Back to Edit
-                </Button>
-                <Button
-                  onClick={handleSubmitReservation}
-                  disabled={isSubmitting}
-                  className="bg-orange-600 hover:bg-orange-700"
-                >
-                  {isSubmitting ? "Confirming..." : "Confirm Reservation"}
-                </Button>
               </div>
             </CardContent>
           </Card>
-        )}
 
-        {step === 4 && (
           <Card>
-            <CardContent className="text-center py-12">
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-6" />
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Reservation Confirmed!</h2>
-              <p className="text-xl text-gray-600 mb-6">Thank you, {reservation.firstName}! Your table is reserved.</p>
-
-              <div className="bg-green-50 p-6 rounded-lg mb-6 max-w-md mx-auto">
-                <h3 className="font-semibold text-gray-900 mb-3">Confirmation Details</h3>
-                <div className="space-y-2 text-sm">
-                  <p>
-                    <strong>Date:</strong> {reservation.date && format(reservation.date, "EEEE, MMMM d, yyyy")}
-                  </p>
-                  <p>
-                    <strong>Time:</strong> {reservation.time}
-                  </p>
-                  <p>
-                    <strong>Party Size:</strong> {reservation.partySize}{" "}
-                    {reservation.partySize === "1" ? "Guest" : "Guests"}
-                  </p>
-                  <p>
-                    <strong>Confirmation #:</strong> SB{Math.random().toString(36).substr(2, 9).toUpperCase()}
-                  </p>
-                </div>
-              </div>
-
-              <p className="text-gray-600 mb-6">A confirmation email has been sent to {reservation.email}</p>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button onClick={() => (window.location.href = "/")}>Return to Home</Button>
-                <Button variant="outline" onClick={() => (window.location.href = "/menu")}>
-                  View Menu
-                </Button>
-              </div>
+            <CardHeader>
+              <CardTitle>Reservation Policy</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• Please arrive within 15 minutes of your reservation time</li>
+                <li>• Cancellations must be made at least 2 hours in advance</li>
+                <li>• Large parties (8+) may require a deposit</li>
+                <li>• We hold tables for 15 minutes past reservation time</li>
+              </ul>
             </CardContent>
           </Card>
-        )}
+        </div>
+
+        <div className="mt-8 flex justify-between">
+          <Button variant="outline" onClick={() => setStep(2)}>
+            Back to Details
+          </Button>
+          <Button onClick={handleSubmitReservation} size="lg">
+            Confirm Reservation
+          </Button>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
+
+  if (step === 4) {
+    return (
+      <div className="max-w-2xl mx-auto p-6 text-center">
+        <div className="mb-8">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="w-8 h-8 text-green-600" />
+          </div>
+          <h1 className="text-3xl font-bold text-green-600 mb-2">Reservation Confirmed!</h1>
+          <p className="text-gray-600">Your table has been successfully reserved</p>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Confirmation Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600 mb-1">Confirmation Number</p>
+              <p className="text-2xl font-bold text-orange-600">{confirmationNumber}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-left">
+              <div>
+                <p className="text-sm text-gray-600">Date & Time</p>
+                <p className="font-medium">
+                  {reservationData.date ? format(reservationData.date, "MMM d, yyyy") : ""} at {reservationData.time}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Party Size</p>
+                <p className="font-medium">
+                  {reservationData.partySize} {reservationData.partySize === "1" ? "Guest" : "Guests"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Name</p>
+                <p className="font-medium">
+                  {reservationData.firstName} {reservationData.lastName}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Contact</p>
+                <p className="font-medium">{reservationData.phone}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="mt-8 space-y-4">
+          <p className="text-sm text-gray-600">
+            A confirmation email has been sent to <strong>{reservationData.email}</strong>
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button onClick={() => (window.location.href = "/")}>Return to Home</Button>
+            <Button variant="outline" onClick={() => (window.location.href = "/menu")}>
+              View Menu
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return null
 }
