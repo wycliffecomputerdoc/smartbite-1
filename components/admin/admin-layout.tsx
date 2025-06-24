@@ -1,131 +1,194 @@
 "use client"
 
 import type React from "react"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { LayoutDashboard, Calendar, Users, Settings, LogOut, ChefHat, BarChart3, MessageSquare } from "lucide-react"
+
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Badge } from "@/components/ui/badge"
+import { LayoutDashboard, Calendar, Users, Settings, Menu, Home, ChefHat, BarChart3, Bell } from "lucide-react"
+import { UserButton, useUser } from "@clerk/nextjs"
+import { cn } from "@/lib/utils"
 
 const navigation = [
   {
-    title: "Overview",
-    items: [
-      { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
-      { title: "Reservations", href: "/admin/reservations", icon: Calendar },
-      { title: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-    ],
+    name: "Dashboard",
+    href: "/admin",
+    icon: LayoutDashboard,
   },
   {
-    title: "Management",
-    items: [
-      { title: "Menu Items", href: "/admin/menu", icon: ChefHat },
-      { title: "Customers", href: "/admin/customers", icon: Users },
-      { title: "Reviews", href: "/admin/reviews", icon: MessageSquare },
-    ],
+    name: "Reservations",
+    href: "/admin/reservations",
+    icon: Calendar,
   },
   {
-    title: "System",
-    items: [{ title: "Settings", href: "/admin/settings", icon: Settings }],
+    name: "Customers",
+    href: "/admin/customers",
+    icon: Users,
+  },
+  {
+    name: "Menu Management",
+    href: "/admin/menu",
+    icon: ChefHat,
+  },
+  {
+    name: "Analytics",
+    href: "/admin/analytics",
+    icon: BarChart3,
+  },
+  {
+    name: "Settings",
+    href: "/admin/settings",
+    icon: Settings,
   },
 ]
 
-export function AdminLayout({ children }: { children: React.ReactNode }) {
+interface AdminLayoutProps {
+  children: React.ReactNode
+}
+
+export function AdminLayout({ children }: AdminLayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
+  const { user } = useUser()
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <Sidebar variant="inset">
-          <SidebarHeader>
-            <div className="flex items-center gap-2 px-4 py-2">
-              <ChefHat className="h-6 w-6 text-orange-600" />
-              <span className="font-bold text-lg">SmartBite Admin</span>
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile sidebar */}
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent side="left" className="w-64 p-0">
+          <div className="flex h-full flex-col">
+            <div className="flex h-16 items-center border-b px-4">
+              <Link href="/" className="flex items-center">
+                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center mr-2">
+                  <span className="text-white font-bold text-sm">SB</span>
+                </div>
+                <span className="text-lg font-bold">SmartBite Admin</span>
+              </Link>
             </div>
-          </SidebarHeader>
+            <nav className="flex-1 space-y-1 px-2 py-4">
+              {navigation.map((item) => {
+                const isActive = pathname === item.href
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      "group flex items-center px-2 py-2 text-sm font-medium rounded-md",
+                      isActive ? "bg-orange-100 text-orange-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                    )}
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <item.icon
+                      className={cn(
+                        "mr-3 h-5 w-5 flex-shrink-0",
+                        isActive ? "text-orange-500" : "text-gray-400 group-hover:text-gray-500",
+                      )}
+                    />
+                    {item.name}
+                  </Link>
+                )
+              })}
+            </nav>
+          </div>
+        </SheetContent>
+      </Sheet>
 
-          <SidebarContent>
-            {navigation.map((section) => (
-              <SidebarGroup key={section.title}>
-                <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {section.items.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild isActive={pathname === item.href}>
-                          <Link href={item.href}>
-                            <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            ))}
-          </SidebarContent>
-
-          <SidebarFooter>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton>
-                      <Avatar className="h-6 w-6">
-                        <AvatarImage src="/placeholder-user.jpg" />
-                        <AvatarFallback>AD</AvatarFallback>
-                      </Avatar>
-                      <span>Admin User</span>
-                    </SidebarMenuButton>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width]">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Settings className="h-4 w-4 mr-2" />
-                      Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sign out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarFooter>
-        </Sidebar>
-
-        <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
-          </header>
-          <main className="flex-1 p-6">{children}</main>
-        </SidebarInset>
+      {/* Desktop sidebar */}
+      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
+        <div className="flex min-h-0 flex-1 flex-col border-r border-gray-200 bg-white">
+          <div className="flex h-16 flex-shrink-0 items-center border-b border-gray-200 px-4">
+            <Link href="/" className="flex items-center">
+              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center mr-2">
+                <span className="text-white font-bold text-sm">SB</span>
+              </div>
+              <span className="text-lg font-bold">SmartBite Admin</span>
+            </Link>
+          </div>
+          <div className="flex flex-1 flex-col overflow-y-auto">
+            <nav className="flex-1 space-y-1 px-2 py-4">
+              {navigation.map((item) => {
+                const isActive = pathname === item.href
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      "group flex items-center px-2 py-2 text-sm font-medium rounded-md",
+                      isActive ? "bg-orange-100 text-orange-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                    )}
+                  >
+                    <item.icon
+                      className={cn(
+                        "mr-3 h-5 w-5 flex-shrink-0",
+                        isActive ? "text-orange-500" : "text-gray-400 group-hover:text-gray-500",
+                      )}
+                    />
+                    {item.name}
+                  </Link>
+                )
+              })}
+            </nav>
+          </div>
+        </div>
       </div>
-    </SidebarProvider>
+
+      {/* Main content */}
+      <div className="lg:pl-64">
+        {/* Top navigation */}
+        <div className="sticky top-0 z-40 flex h-16 flex-shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+          <Button variant="outline" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
+            <Menu className="h-4 w-4" />
+          </Button>
+
+          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+            <div className="flex flex-1 items-center">
+              <h1 className="text-lg font-semibold text-gray-900">Restaurant Management</h1>
+            </div>
+            <div className="flex items-center gap-x-4 lg:gap-x-6">
+              {/* Back to main site */}
+              <Link href="/">
+                <Button variant="outline" size="sm">
+                  <Home className="h-4 w-4 mr-2" />
+                  Back to Site
+                </Button>
+              </Link>
+
+              {/* Notifications */}
+              <Button variant="outline" size="sm" className="relative">
+                <Bell className="h-4 w-4" />
+                <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                  3
+                </Badge>
+              </Button>
+
+              {/* User menu */}
+              <div className="flex items-center gap-x-2">
+                <div className="hidden lg:flex lg:flex-col lg:items-end lg:leading-6">
+                  <span className="text-sm font-semibold text-gray-900">
+                    {user?.firstName} {user?.lastName}
+                  </span>
+                  <span className="text-xs text-gray-500">Administrator</span>
+                </div>
+                <UserButton
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-8 h-8",
+                    },
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Page content */}
+        <main className="py-10">
+          <div className="px-4 sm:px-6 lg:px-8">{children}</div>
+        </main>
+      </div>
+    </div>
   )
 }

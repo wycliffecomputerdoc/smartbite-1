@@ -1,81 +1,164 @@
 # SmartBite Restaurant Website
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+A modern, AI-powered restaurant website built with Next.js, featuring intelligent chatbot assistance, online reservations, menu management, and comprehensive admin tools.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/wycliffe-kwame-gyambibis-projects/v0-new-project-ss8bmns7sst)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/ss8bmNS7sSt)
+## 🚀 Features
 
-## Overview
+### Customer Features
+- **Interactive Menu** - Browse dishes with high-quality images and detailed descriptions
+- **Smart Reservations** - Easy booking system with date/time selection and party size options
+- **AI Chatbot** - Intelligent assistant for menu questions, reservations, and general inquiries
+- **Contact & Location** - Interactive map and contact information
+- **Responsive Design** - Perfect experience on all devices
 
-SmartBite is a modern restaurant website with AI-powered features including an intelligent chatbot, voice ordering, and personalized recommendations.
+### Admin Features
+- **Dashboard Overview** - Real-time statistics and reservation insights
+- **Reservation Management** - View, edit, and manage all bookings
+- **Customer Management** - Track customer information and booking history
+- **Analytics** - Detailed reporting and performance metrics
+- **Secure Authentication** - Clerk-powered admin access
 
-## Features
+## 🛠️ Tech Stack
 
-- 🤖 **AI Chatbot** - Get instant help with menu recommendations and orders
-- 🎤 **Voice Ordering** - Order using voice commands
-- 📱 **Mobile-First Design** - Responsive design for all devices
-- 🍽️ **Smart Menu** - AI-powered food recommendations
-- 🛒 **Shopping Cart** - Easy order management
-- 👤 **User Authentication** - Secure login system
+- **Framework**: Next.js 15 with App Router
+- **Authentication**: Clerk
+- **Styling**: Tailwind CSS + shadcn/ui
+- **AI Integration**: OpenAI GPT-4
+- **Icons**: Lucide React
+- **Database**: Ready for integration (PostgreSQL/MySQL)
 
-## Setup Instructions
+## 📦 Installation
 
-### 1. Environment Variables
+1. **Clone the repository**
+   \`\`\`bash
+   git clone <repository-url>
+   cd smartbite-restaurant
+   \`\`\`
 
-Create a `.env.local` file in the root directory and add your OpenAI API key:
+2. **Install dependencies**
+   \`\`\`bash
+   npm install
+   \`\`\`
 
-\`\`\`bash
-OPENAI_API_KEY=your_openai_api_key_here
-\`\`\`
+3. **Set up environment variables**
+   \`\`\`bash
+   cp .env.example .env.local
+   \`\`\`
+   
+   Fill in your environment variables:
+   - `OPENAI_API_KEY`: Your OpenAI API key for chatbot functionality
+   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: Your Clerk publishable key
+   - `CLERK_SECRET_KEY`: Your Clerk secret key
 
-### 2. Install Dependencies
+4. **Run the development server**
+   \`\`\`bash
+   npm run dev
+   \`\`\`
 
-\`\`\`bash
-npm install
-\`\`\`
+5. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-### 3. Run Development Server
+## 🔧 Configuration
 
-\`\`\`bash
-npm run dev
-\`\`\`
+### Clerk Authentication Setup
 
-### 4. Test the Chatbot
+1. Create a Clerk account at [clerk.com](https://clerk.com)
+2. Create a new application
+3. Copy your publishable and secret keys to `.env.local`
+4. Configure sign-in/sign-up options in your Clerk dashboard
 
-1. Open the website in your browser
-2. Click the chat icon in the bottom right
-3. Send a test message like "Hello" or "Show me the menu"
+### Admin Access
 
-## Troubleshooting
+To access the admin panel:
+1. Sign up with the email: `admin@smartbite.com`
+2. Navigate to `/admin` or use the "Admin" button in the navbar
+3. Manage reservations, view analytics, and configure settings
 
-### Chatbot Not Responding
+### OpenAI Integration
 
-1. **Check API Key**: Ensure your OpenAI API key is correctly set in `.env.local`
-2. **Check Console**: Open browser dev tools and check for error messages
-3. **Test API**: Visit `/api/test` to verify the API is working
-4. **Check Quota**: Ensure your OpenAI account has available credits
+1. Get an API key from [OpenAI](https://platform.openai.com)
+2. Add it to your `.env.local` file
+3. The chatbot will automatically start working
 
-### Common Issues
+## 📱 Usage
 
-- **API Key Missing**: Add `OPENAI_API_KEY` to your environment variables
-- **Network Issues**: Check your internet connection
-- **Quota Exceeded**: Check your OpenAI usage limits
+### For Customers
+- **Browse Menu**: View dishes with images, descriptions, and prices
+- **Make Reservations**: Select date, time, and party size
+- **Chat with AI**: Ask questions about menu, hours, or make reservations
+- **Contact**: Find location and contact information
 
-## Deployment
+### For Administrators
+- **Dashboard**: View today's reservations and key metrics
+- **Manage Reservations**: Edit, confirm, or cancel bookings
+- **Customer Insights**: Track customer information and preferences
+- **Analytics**: Monitor restaurant performance and trends
 
-Your project is live at:
+## 🎨 Customization
 
-**[https://vercel.com/wycliffe-kwame-gyambibis-projects/v0-new-project-ss8bmns7sst](https://vercel.com/wycliffe-kwame-gyambibis-projects/v0-new-project-ss8bmns7sst)**
+### Styling
+- Colors and themes can be modified in `tailwind.config.ts`
+- Component styles are in `app/globals.css`
+- shadcn/ui components can be customized in `components/ui/`
 
-## Build your app
+### Content
+- Update restaurant information in component files
+- Modify menu items in `components/menu/menu-content.tsx`
+- Customize chatbot responses in `app/api/chat/route.ts`
 
-Continue building your app on:
+## 🚀 Deployment
 
-**[https://v0.dev/chat/projects/ss8bmNS7sSt](https://v0.dev/chat/projects/ss8bmNS7sSt)**
+### Vercel (Recommended)
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy automatically
 
-## How It Works
+### Other Platforms
+The app can be deployed to any platform that supports Next.js:
+- Netlify
+- Railway
+- DigitalOcean App Platform
+- AWS Amplify
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+## 📊 Database Integration
+
+The app is ready for database integration. Recommended options:
+- **Supabase** - PostgreSQL with real-time features
+- **PlanetScale** - MySQL with branching
+- **Neon** - Serverless PostgreSQL
+- **MongoDB Atlas** - NoSQL option
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Support
+
+If you need help:
+1. Check the documentation above
+2. Look at the example environment file
+3. Review the component structure
+4. Open an issue on GitHub
+
+## 🎯 Roadmap
+
+- [ ] Real database integration
+- [ ] Email notifications for reservations
+- [ ] Online ordering and payment
+- [ ] Loyalty program
+- [ ] Multi-location support
+- [ ] Advanced analytics dashboard
+- [ ] Mobile app (React Native)
+
+---
+
+Built with ❤️ using Next.js and modern web technologies.
