@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Utensils, Clock, Star } from "lucide-react"
+import { ArrowRight, Utensils, Clock, Star, MapPin } from "lucide-react"
 import Link from "next/link"
+import { ReservationWidget } from "@/components/reservations/reservation-widget"
 
 export function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -54,59 +55,76 @@ export function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-        <div className="animate-fade-in">
-          <h1 className="text-5xl md:text-7xl font-bold mb-4 animate-slide-up">{slides[currentSlide].title}</h1>
-          <p className="text-xl md:text-2xl mb-2 text-orange-400 animate-slide-up delay-100">
-            {slides[currentSlide].subtitle}
-          </p>
-          <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto animate-slide-up delay-200">
-            {slides[currentSlide].description}
-          </p>
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Left Side - Main Content */}
+          <div className="text-center lg:text-left text-white">
+            <div className="animate-fade-in">
+              <h1 className="text-5xl md:text-7xl font-bold mb-4 animate-slide-up">{slides[currentSlide].title}</h1>
+              <p className="text-xl md:text-2xl mb-2 text-orange-400 animate-slide-up delay-100">
+                {slides[currentSlide].subtitle}
+              </p>
+              <p className="text-lg md:text-xl mb-8 max-w-2xl animate-slide-up delay-200">
+                {slides[currentSlide].description}
+              </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up delay-300">
-            <Button asChild size="lg" className="bg-orange-600 hover:bg-orange-700">
-              <Link href="/menu">
-                <Utensils className="mr-2 h-5 w-5" />
-                View Menu
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="border-white text-white hover:bg-white hover:text-black"
-            >
-              <Link href="/orders">
-                Order Now
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          </div>
-        </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-slide-up delay-300">
+                <Button asChild size="lg" className="bg-orange-600 hover:bg-orange-700">
+                  <Link href="/menu">
+                    <Utensils className="mr-2 h-5 w-5" />
+                    View Menu
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="border-white text-white hover:bg-white hover:text-black"
+                >
+                  <Link href="/orders">
+                    Order Now
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-8 mt-16 animate-slide-up delay-500">
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-2">
-              <Star className="h-6 w-6 text-yellow-400 mr-1" />
-              <span className="text-2xl font-bold">4.9</span>
+            {/* Stats */}
+            <div className="grid grid-cols-4 gap-4 md:gap-8 mt-16 animate-slide-up delay-500">
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Star className="h-6 w-6 text-yellow-400 mr-1" />
+                  <span className="text-2xl font-bold">4.9</span>
+                </div>
+                <p className="text-sm opacity-80">Rating</p>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Clock className="h-6 w-6 text-green-400 mr-1" />
+                  <span className="text-2xl font-bold">25</span>
+                </div>
+                <p className="text-sm opacity-80">Min Delivery</p>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Utensils className="h-6 w-6 text-orange-400 mr-1" />
+                  <span className="text-2xl font-bold">150+</span>
+                </div>
+                <p className="text-sm opacity-80">Menu Items</p>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <MapPin className="h-6 w-6 text-blue-400 mr-1" />
+                  <span className="text-2xl font-bold">1</span>
+                </div>
+                <p className="text-sm opacity-80">Location</p>
+              </div>
             </div>
-            <p className="text-sm opacity-80">Customer Rating</p>
           </div>
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-2">
-              <Clock className="h-6 w-6 text-green-400 mr-1" />
-              <span className="text-2xl font-bold">25</span>
-            </div>
-            <p className="text-sm opacity-80">Min Delivery</p>
-          </div>
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-2">
-              <Utensils className="h-6 w-6 text-orange-400 mr-1" />
-              <span className="text-2xl font-bold">150+</span>
-            </div>
-            <p className="text-sm opacity-80">Menu Items</p>
+
+          {/* Right Side - Reservation Widget */}
+          <div className="flex justify-center lg:justify-end animate-slide-up delay-400">
+            <ReservationWidget />
           </div>
         </div>
       </div>

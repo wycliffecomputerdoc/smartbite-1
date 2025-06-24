@@ -1,4 +1,4 @@
-# New Project
+# SmartBite Restaurant Website
 
 *Automatically synced with your [v0.dev](https://v0.dev) deployments*
 
@@ -7,8 +7,59 @@
 
 ## Overview
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+SmartBite is a modern restaurant website with AI-powered features including an intelligent chatbot, voice ordering, and personalized recommendations.
+
+## Features
+
+- 🤖 **AI Chatbot** - Get instant help with menu recommendations and orders
+- 🎤 **Voice Ordering** - Order using voice commands
+- 📱 **Mobile-First Design** - Responsive design for all devices
+- 🍽️ **Smart Menu** - AI-powered food recommendations
+- 🛒 **Shopping Cart** - Easy order management
+- 👤 **User Authentication** - Secure login system
+
+## Setup Instructions
+
+### 1. Environment Variables
+
+Create a `.env.local` file in the root directory and add your OpenAI API key:
+
+\`\`\`bash
+OPENAI_API_KEY=your_openai_api_key_here
+\`\`\`
+
+### 2. Install Dependencies
+
+\`\`\`bash
+npm install
+\`\`\`
+
+### 3. Run Development Server
+
+\`\`\`bash
+npm run dev
+\`\`\`
+
+### 4. Test the Chatbot
+
+1. Open the website in your browser
+2. Click the chat icon in the bottom right
+3. Send a test message like "Hello" or "Show me the menu"
+
+## Troubleshooting
+
+### Chatbot Not Responding
+
+1. **Check API Key**: Ensure your OpenAI API key is correctly set in `.env.local`
+2. **Check Console**: Open browser dev tools and check for error messages
+3. **Test API**: Visit `/api/test` to verify the API is working
+4. **Check Quota**: Ensure your OpenAI account has available credits
+
+### Common Issues
+
+- **API Key Missing**: Add `OPENAI_API_KEY` to your environment variables
+- **Network Issues**: Check your internet connection
+- **Quota Exceeded**: Check your OpenAI usage limits
 
 ## Deployment
 
