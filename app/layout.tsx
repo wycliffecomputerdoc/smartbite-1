@@ -21,16 +21,23 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className={inter.className}>
+    <html lang="en">
+      <body className={inter.className}>
+        <ClerkProvider
+          appearance={{
+            variables: {
+              colorPrimary: "hsl(222.2 47.4% 11.2%)",
+              borderRadius: "0.5rem",
+            },
+          }}
+        >
           <CartProvider>
             {children}
             <ChatBot />
             <Toaster />
           </CartProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   )
 }

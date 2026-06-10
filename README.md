@@ -5,6 +5,7 @@ A comprehensive restaurant management system built with Next.js, featuring onlin
 ## 🚀 Features
 
 ### Customer Features
+
 - **Online Reservations** - Book tables with date/time selection and party size
 - **Interactive Menu** - Browse menu items with images, descriptions, and pricing
 - **User Authentication** - Secure sign-up/sign-in with Clerk
@@ -12,6 +13,7 @@ A comprehensive restaurant management system built with Next.js, featuring onlin
 - **Responsive Design** - Perfect experience on all devices
 
 ### Admin Features
+
 - **Reservation Management** - View, edit, and manage all reservations
 - **Menu Management** - Add, edit, and organize menu items
 - **User Management** - Handle customer accounts and roles
@@ -31,38 +33,39 @@ A comprehensive restaurant management system built with Next.js, featuring onlin
 
 1. **Clone the repository**
    \`\`\`bash
-   git clone <repository-url>
+   git clone `<repository-url>`
    cd smartbite-restaurant
    \`\`\`
-
 2. **Install dependencies**
    \`\`\`bash
    npm install
    \`\`\`
-
 3. **Set up environment variables**
    \`\`\`bash
    cp .env.example .env.local
    \`\`\`
-   
+
    Fill in your environment variables:
+
    - `NEON_DATABASE_URL` - PostgreSQL connection string
    - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk publishable key
    - `CLERK_SECRET_KEY` - Clerk secret key
    - `OPENAI_API_KEY` - OpenAI API key for chatbot
-
 4. **Set up the database**
    \`\`\`bash
+
    # Generate Prisma client
+
    npm run db:generate
-   
+
    # Push database schema
+
    npm run db:push
-   
+
    # Seed the database with sample data
+
    npm run db:seed
    \`\`\`
-
 5. **Run the development server**
    \`\`\`bash
    npm run dev
@@ -71,6 +74,7 @@ A comprehensive restaurant management system built with Next.js, featuring onlin
 ## 🗄️ Database Schema
 
 ### Core Models
+
 - **User** - Customer and admin user accounts
 - **Reservation** - Table reservations with status tracking
 - **MenuItem** - Restaurant menu items with categories
@@ -78,6 +82,7 @@ A comprehensive restaurant management system built with Next.js, featuring onlin
 - **OrderItem** - Individual items within orders
 
 ### Key Features
+
 - **Role-based Access** - Customer, Staff, Manager, Admin roles
 - **Status Tracking** - Reservation and order status management
 - **Audit Trail** - Created/updated timestamps on all records
@@ -86,12 +91,15 @@ A comprehensive restaurant management system built with Next.js, featuring onlin
 ## 🔧 Available Scripts
 
 \`\`\`bash
+
 # Development
+
 npm run dev          # Start development server
 npm run build        # Build for production
 npm run start        # Start production server
 
 # Database
+
 npm run db:generate  # Generate Prisma client
 npm run db:push      # Push schema to database
 npm run db:migrate   # Run database migrations
@@ -100,17 +108,20 @@ npm run db:studio    # Open Prisma Studio
 npm run db:reset     # Reset database (caution!)
 
 # Other
+
 npm run lint         # Run ESLint
 \`\`\`
 
 ## 🎯 Getting Started
 
 ### Admin Access
+
 1. Sign up with email: `admin@smartbite.com`
 2. Access admin dashboard at `/admin`
 3. Manage reservations, menu items, and users
 
 ### Customer Experience
+
 1. Browse the menu at `/menu`
 2. Make reservations at `/reservations`
 3. Chat with AI assistant for help
@@ -140,11 +151,13 @@ npm run lint         # Run ESLint
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
+
 1. Connect your GitHub repository to Vercel
 2. Add environment variables in Vercel dashboard
 3. Deploy automatically on every push
 
 ### Database Setup
+
 1. Create PostgreSQL database (recommended: Neon, Supabase, or Railway)
 2. Update `DATABASE_URL` in environment variables
 3. Run migrations: `npm run db:push`
@@ -171,7 +184,7 @@ This project is licensed under the MIT License.
 
 ## 🆘 Support
 
-For support, email support@smartbite.com or create an issue in the repository.
+For support, email gyambibiw@gmail.com or create an issue in the repository.
 
 ---
 
